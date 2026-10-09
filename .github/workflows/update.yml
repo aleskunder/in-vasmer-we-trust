@@ -1,0 +1,65 @@
+name: Обновить сайт
+
+on:
+  schedule:
+    - cron: "17 5 * * *"      # ежедневно, 05:17 UTC
+  workflow_dispatch:           # и по кнопке
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install requests pyyaml
+
+      - name: Забрать новые посты из канала
+        run: python scripts/scrape.py
+
+      - name: Извлечь кандидатов в словарь
+        run: python scripts/extract.py
+
+      - name: Собрать сайт
+        run: python scripts/build.py
+
+      - name: Закоммитить архив, если он пополнился
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [[ -n "$(git status --porcelain data/)" ]]; then
+            git add data/
+            git commit -m "data: новые посты из канала"
+            git push
+          else
+            echo "новых постов нет"
+          fi
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
