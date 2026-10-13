@@ -180,6 +180,21 @@ h3{font-size:1.05rem;margin:0 0 .2rem}
 .scorebar button{margin-left:auto;font:inherit;font-size:.85rem;color:var(--dim);cursor:pointer;
   background:none;border:1px solid var(--line);border-radius:7px;padding:.25rem .6rem}
 .scorebar button:hover{color:var(--accent);border-color:var(--accent)}
+
+.nextbtn{font:inherit;cursor:pointer;color:var(--accent);background:var(--accent-soft);
+  border:1px solid var(--accent);border-radius:9px;padding:.55rem 1rem}
+.nextbtn:hover{background:var(--accent);color:var(--bg)}
+.alldone{color:var(--dim)}
+.qindex{list-style:none;margin:.6rem 0 0;padding:0;display:grid;gap:.3rem;
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+.qindex button{width:100%;text-align:left;font:inherit;font-size:.9rem;cursor:pointer;
+  color:var(--ink);background:var(--panel);border:1px solid var(--line);
+  border-radius:8px;padding:.35rem .5rem;display:flex;gap:.5rem;align-items:baseline}
+.qindex button:hover{border-color:var(--accent);color:var(--accent)}
+.qindex .num{color:var(--dim);font-size:.8rem;min-width:1.7em;flex:none}
+.qindex button.ok{border-color:#2e7d52;background:color-mix(in srgb,#2e7d52 10%,var(--panel))}
+.qindex button.no{border-color:#b3453a;background:color-mix(in srgb,#b3453a 10%,var(--panel))}
+.qindex button.cur{outline:2px solid var(--accent);outline-offset:1px}
 @media (max-width:520px){
   h1{font-size:1.6rem}
   .top .wrap{padding-block:.6rem}
@@ -339,23 +354,28 @@ run();q.focus({preventScroll:true});
     KIND = {"rodstvo": "какие слова родственны",
             "lishnee": "найдите лишнее",
             "other": "вопрос"}
-    cards_q = []
+    cards_q, index_q = [], []
     for n, q in enumerate(quizzes, 1):
         poll = next(p for p in posts if p["id"] == q["poll"]).get("poll", {})
         opts = poll.get("answers", [])
         correct = q.get("correct")
+        words = ", ".join(q["words"])
         buttons = "".join(
             f'<li><button type="button" data-i="{i}">{esc(o.rstrip(";."))}</button></li>'
             for i, o in enumerate(opts))
         cards_q.append(
-            f'<div class="qz" data-correct="{"" if correct is None else correct}" data-id="{q["poll"]}">'
-            f'<p class="ws">{esc(", ".join(q["words"]))}</p>'
-            f'<p class="kind">{n}/{len(quizzes)} · {esc(KIND.get(q["kind"], ""))}</p>'
+            f'<div class="qz hidden" data-correct="{"" if correct is None else correct}" '
+            f'data-id="{q["poll"]}" data-n="{n}">'
+            f'<p class="ws">{esc(words)}</p>'
+            f'<p class="kind">№{n} из {len(quizzes)} · {esc(KIND.get(q["kind"], ""))}</p>'
             f'<ol class="opts">{buttons}</ol>'
             f'<p class="verdict hidden">'
             f'<span class="mark"></span> {esc(q["answer"])} '
             f'<a href="{link(q["post"])}">разбор&nbsp;↗</a> · '
             f'<a href="{link(q["poll"])}">опрос в канале&nbsp;↗</a></p></div>')
+        index_q.append(
+            f'<li><button type="button" data-goto="{q["poll"]}">'
+            f'<span class="num">{n}</span>{esc(words)}</button></li>')
 
     quiz_js = """
 <script>
@@ -363,53 +383,88 @@ const KEY='ivwt-quiz-v1';
 let saved={};
 try{saved=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
 const cards=[...document.querySelectorAll('.qz')];
+const idx=[...document.querySelectorAll('.qindex button')];
 const el=id=>document.getElementById(id);
+const byId=id=>cards.find(c=>c.dataset.id===String(id));
 function store(){try{localStorage.setItem(KEY,JSON.stringify(saved))}catch(e){}}
-function score(){
+
+function paint(){
   const done=Object.keys(saved).length;
   const right=Object.values(saved).filter(v=>v.ok).length;
   el('done').textContent=done; el('right').textContent=right;
   el('total').textContent=cards.length;
   el('reset').classList.toggle('hidden',!done);
+  idx.forEach(b=>{
+    const st=saved[b.dataset.goto];
+    b.classList.toggle('ok', !!st&&st.ok);
+    b.classList.toggle('no', !!st&&!st.ok);
+  });
+  el('nextwrap').classList.toggle('hidden', done>=cards.length);
+  el('alldone').classList.toggle('hidden', done<cards.length);
 }
 function reveal(card,picked,save){
   const raw=card.dataset.correct, correct=raw===''?null:+raw;
-  const btns=[...card.querySelectorAll('button')];
   const ok = correct===null ? false : picked===correct;
-  btns.forEach(b=>{
+  card.querySelectorAll('button').forEach(b=>{
     b.disabled=true; const i=+b.dataset.i;
-    if(i===correct){b.classList.add('right');b.insertAdjacentHTML('beforeend','<span class="tick">\u2713</span>');}
-    if(i===picked&&i!==correct){b.classList.add('wrong');b.insertAdjacentHTML('beforeend','<span class="tick">\u2717</span>');}
+    if(i===correct&&!b.querySelector('.tick')){b.classList.add('right');b.insertAdjacentHTML('beforeend','<span class="tick">\u2713</span>');}
+    if(i===picked&&i!==correct&&!b.querySelector('.tick')){b.classList.add('wrong');b.insertAdjacentHTML('beforeend','<span class="tick">\u2717</span>');}
   });
   const v=card.querySelector('.verdict');
   v.querySelector('.mark').innerHTML = correct===null
     ? '<b class="ok">Верного варианта нет.</b>'
     : (ok?'<b class="ok">Верно.</b>':'<b class="no">Мимо.</b>');
   v.classList.remove('hidden');
-  if(save){saved[card.dataset.id]={p:picked,ok:ok};store();score();}
+  if(save){saved[card.dataset.id]={p:picked,ok:ok};store();paint();}
 }
-cards.forEach(card=>{
-  const prev=saved[card.dataset.id];
-  if(prev!==undefined) reveal(card,prev.p,false);
-  card.querySelectorAll('button').forEach(b=>{
-    b.addEventListener('click',()=>reveal(card,+b.dataset.i,true));
+function show(card,scroll){
+  cards.forEach(c=>c.classList.add('hidden'));
+  card.classList.remove('hidden');
+  idx.forEach(b=>b.classList.toggle('cur', b.dataset.goto===card.dataset.id));
+  const st=saved[card.dataset.id];
+  if(st!==undefined && card.querySelector('.verdict').classList.contains('hidden'))
+    reveal(card,st.p,false);
+  if(scroll) el('stage').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function pick(){
+  const left=cards.filter(c=>saved[c.dataset.id]===undefined);
+  const pool=left.length?left:cards;
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+cards.forEach(card=>card.querySelectorAll('.opts button').forEach(b=>{
+  b.addEventListener('click',()=>reveal(card,+b.dataset.i,true));
+}));
+idx.forEach(b=>b.addEventListener('click',()=>show(byId(b.dataset.goto),true)));
+el('next').addEventListener('click',()=>show(pick(),true));
+el('reset').addEventListener('click',()=>{
+  saved={};store();
+  cards.forEach(c=>{
+    c.querySelector('.verdict').classList.add('hidden');
+    c.querySelectorAll('.opts button').forEach(b=>{
+      b.disabled=false;b.classList.remove('right','wrong');
+      const t=b.querySelector('.tick'); if(t)t.remove();
+    });
   });
+  show(pick(),false);paint();
 });
-el('reset').addEventListener('click',()=>{saved={};store();location.reload();});
-score();
+show(pick(),false);paint();
 </script>"""
 
     body = f"""
 <h1>Опросы</h1>
 <p class="lede">Два формата: «какие из слов родственны» и «найдите лишнее».
 В канале сперва выходил опрос, через несколько дней — разбор.
-Здесь можно ответить и сразу проверить себя.</p>
+Показывается по одному случайному; внизу указатель по всем.</p>
 <div class="scorebar">
   <span>отвечено <b id="done">0</b> из <b id="total">0</b></span>
   <span>угадано <b id="right">0</b></span>
   <button id="reset" type="button" class="hidden">сбросить</button>
 </div>
-{''.join(cards_q)}
+<div id="stage">{''.join(cards_q)}</div>
+<p id="nextwrap"><button id="next" class="nextbtn" type="button">Следующий случайный →</button></p>
+<p id="alldone" class="hidden alldone">Все {len(quizzes)} пройдены. Можно сбросить и начать заново.</p>
+<h2>Указатель</h2>
+<ol class="qindex">{''.join(index_q)}</ol>
 {quiz_js}
 """
     (SITE / "oprosy.html").write_text(
