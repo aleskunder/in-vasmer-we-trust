@@ -45,7 +45,8 @@ def sort_key(word):
 
 
 PAGES = [("index.html", "Канал"), ("slovar.html", "Словарь"),
-         ("korni.html", "Корни"), ("serii.html", "Серии")]
+         ("korni.html", "Корни"), ("serii.html", "Серии"),
+         ("oprosy.html", "Опросы")]
 
 
 def shell(active, title, subtitle, body, extra_head=""):
@@ -157,6 +158,28 @@ h3{font-size:1.05rem;margin:0 0 .2rem}
 .quiz{padding:.45rem 0;border-bottom:1px solid var(--line);font-size:.95rem}
 .quiz .ws{font-weight:600}
 .hidden{display:none !important}
+
+.qz{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+  padding:1rem 1.1rem;margin:0 0 1rem}
+.qz .ws{font-family:Georgia,serif;font-size:1.15rem;margin:0 0 .1rem}
+.qz .kind{color:var(--dim);font-size:.8rem;margin:0 0 .7rem}
+.qz ol.opts{list-style:none;margin:0;padding:0;display:grid;gap:.4rem}
+.qz button{width:100%;text-align:left;font:inherit;color:var(--ink);cursor:pointer;
+  background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:.5rem .7rem}
+.qz button:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.qz button:disabled{cursor:default}
+.qz button.right{border-color:#2e7d52;background:color-mix(in srgb,#2e7d52 12%,var(--bg));color:var(--ink)}
+.qz button.wrong{border-color:#b3453a;background:color-mix(in srgb,#b3453a 12%,var(--bg));color:var(--ink)}
+.qz button .tick{float:right;font-weight:700}
+.qz .verdict{margin:.7rem 0 0;padding-top:.7rem;border-top:1px solid var(--line);font-size:.93rem}
+.qz .verdict b.ok{color:#2e7d52} .qz .verdict b.no{color:#b3453a}
+.scorebar{position:sticky;top:3.1rem;z-index:4;background:var(--panel);
+  border:1px solid var(--line);border-radius:10px;padding:.55rem .9rem;margin:1rem 0 1.4rem;
+  display:flex;gap:1rem;align-items:center;flex-wrap:wrap;font-size:.92rem}
+.scorebar b{font-size:1.05rem}
+.scorebar button{margin-left:auto;font:inherit;font-size:.85rem;color:var(--dim);cursor:pointer;
+  background:none;border:1px solid var(--line);border-radius:7px;padding:.25rem .6rem}
+.scorebar button:hover{color:var(--accent);border-color:var(--accent)}
 @media (max-width:520px){
   h1{font-size:1.6rem}
   .top .wrap{padding-block:.6rem}
@@ -303,30 +326,98 @@ run();q.focus({preventScroll:true});
             f'<p class="when">{esc(s["period"])} · {len(s["posts"])} постов</p>'
             f'<p class="lede">{esc(" ".join(s["blurb"].split()))}</p>'
             f'<ol>{items}</ol></section>')
-    qrows = "".join(
-        f'<div class="quiz"><span class="ws">{esc(", ".join(q["words"]))}</span> — '
-        f'<a href="{link(q["poll"])}">опрос&nbsp;↗</a> · '
-        f'<a href="{link(q["post"])}">разбор&nbsp;↗</a></div>'
-        for q in quizzes)
     body = f"""
 <h1>Серии</h1>
-<p class="lede">Крупные сюжеты канала по порядку — их удобно читать подряд,
-с начала.</p>
+<p class="lede">Серии постов по отдельным случайным языковым и не очень темам.</p>
 {''.join(blocks)}
-<section class="serie" id="interaktivy">
-<h2>Интерактивы</h2>
-<p class="when">июль 2022 — июль 2026 · {len(quizzes)} раундов</p>
-<p class="lede">Два формата: «какие из слов родственны» и «найдите лишнее».
-Сперва опрос, через несколько дней — разбор.</p>
-{qrows}
-</section>
 """
     (SITE / "serii.html").write_text(
         shell("serii.html", "Серии", "Сюжетные циклы канала и архив интерактивов", body),
         encoding="utf-8")
 
+    # ---------- опросы ----------
+    KIND = {"rodstvo": "какие слова родственны",
+            "lishnee": "найдите лишнее",
+            "other": "вопрос"}
+    cards_q = []
+    for n, q in enumerate(quizzes, 1):
+        poll = next(p for p in posts if p["id"] == q["poll"]).get("poll", {})
+        opts = poll.get("answers", [])
+        correct = q.get("correct")
+        buttons = "".join(
+            f'<li><button type="button" data-i="{i}">{esc(o.rstrip(";."))}</button></li>'
+            for i, o in enumerate(opts))
+        cards_q.append(
+            f'<div class="qz" data-correct="{"" if correct is None else correct}" data-id="{q["poll"]}">'
+            f'<p class="ws">{esc(", ".join(q["words"]))}</p>'
+            f'<p class="kind">{n}/{len(quizzes)} · {esc(KIND.get(q["kind"], ""))}</p>'
+            f'<ol class="opts">{buttons}</ol>'
+            f'<p class="verdict hidden">'
+            f'<span class="mark"></span> {esc(q["answer"])} '
+            f'<a href="{link(q["post"])}">разбор&nbsp;↗</a> · '
+            f'<a href="{link(q["poll"])}">опрос в канале&nbsp;↗</a></p></div>')
+
+    quiz_js = """
+<script>
+const KEY='ivwt-quiz-v1';
+let saved={};
+try{saved=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
+const cards=[...document.querySelectorAll('.qz')];
+const el=id=>document.getElementById(id);
+function store(){try{localStorage.setItem(KEY,JSON.stringify(saved))}catch(e){}}
+function score(){
+  const done=Object.keys(saved).length;
+  const right=Object.values(saved).filter(v=>v.ok).length;
+  el('done').textContent=done; el('right').textContent=right;
+  el('total').textContent=cards.length;
+  el('reset').classList.toggle('hidden',!done);
+}
+function reveal(card,picked,save){
+  const raw=card.dataset.correct, correct=raw===''?null:+raw;
+  const btns=[...card.querySelectorAll('button')];
+  const ok = correct===null ? false : picked===correct;
+  btns.forEach(b=>{
+    b.disabled=true; const i=+b.dataset.i;
+    if(i===correct){b.classList.add('right');b.insertAdjacentHTML('beforeend','<span class="tick">\u2713</span>');}
+    if(i===picked&&i!==correct){b.classList.add('wrong');b.insertAdjacentHTML('beforeend','<span class="tick">\u2717</span>');}
+  });
+  const v=card.querySelector('.verdict');
+  v.querySelector('.mark').innerHTML = correct===null
+    ? '<b class="ok">Верного варианта нет.</b>'
+    : (ok?'<b class="ok">Верно.</b>':'<b class="no">Мимо.</b>');
+  v.classList.remove('hidden');
+  if(save){saved[card.dataset.id]={p:picked,ok:ok};store();score();}
+}
+cards.forEach(card=>{
+  const prev=saved[card.dataset.id];
+  if(prev!==undefined) reveal(card,prev.p,false);
+  card.querySelectorAll('button').forEach(b=>{
+    b.addEventListener('click',()=>reveal(card,+b.dataset.i,true));
+  });
+});
+el('reset').addEventListener('click',()=>{saved={};store();location.reload();});
+score();
+</script>"""
+
+    body = f"""
+<h1>Опросы</h1>
+<p class="lede">Два формата: «какие из слов родственны» и «найдите лишнее».
+В канале сперва выходил опрос, через несколько дней — разбор.
+Здесь можно ответить и сразу проверить себя.</p>
+<div class="scorebar">
+  <span>отвечено <b id="done">0</b> из <b id="total">0</b></span>
+  <span>угадано <b id="right">0</b></span>
+  <button id="reset" type="button" class="hidden">сбросить</button>
+</div>
+{''.join(cards_q)}
+{quiz_js}
+"""
+    (SITE / "oprosy.html").write_text(
+        shell("oprosy.html", "Опросы", "Интерактивы канала: ответить и проверить себя", body),
+        encoding="utf-8")
+
     print(f"site/: {len(merged)} статей ({len(auto)} авто), {len(order)} корней, "
-          f"{len(series)} серий, {len(quizzes)} интерактивов")
+          f"{len(series)} серий, {len(quizzes)} опросов")
 
 
 if __name__ == "__main__":

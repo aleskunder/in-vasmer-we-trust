@@ -1,58 +1,58 @@
 # Интерактивы: опрос -> разбор. answer — краткий правильный ответ.
 # kind: rodstvo («какие родственны») | lishnee («найдите лишнее») | other
-- {poll: 164, post: 166, kind: rodstvo, words: [фундук, фундамент, понтоваться], answer: "родственны фундук и понтоваться — оба от PIE *pónteh₁s «путь»"}
-- {poll: 170, post: 171, kind: rodstvo, words: [мошенник, мошка, мошонка], answer: "родственны мошенник и мошонка — от мошны «кошелёк»"}
-- {poll: 179, post: 180, kind: rodstvo, words: [лакримоза, лакрица, лакмус], answer: "все три разного происхождения"}
-- {poll: 183, post: 184, kind: rodstvo, words: [манипулировать, манная, манить], answer: "все разного происхождения (хотя про манить и манипулировать версия есть)"}
-- {poll: 191, post: 193, kind: rodstvo, words: [соль, солнце, сладкий], answer: "родственны соль и сладкий: солёный → вкусный → пряный → сладкий"}
-- {poll: 208, post: 210, kind: rodstvo, words: [каракатица, каракули, окорок], answer: "родственны каракатица и окорок — от *korkъ «нога»"}
-- {poll: 241, post: 243, kind: rodstvo, words: [набухать, бухта, буханка], answer: "все разного происхождения"}
-- {poll: 247, post: 248, kind: rodstvo, words: [оранжевый, рыжий, орангутан], answer: "все разного происхождения"}
-- {poll: 253, post: 254, kind: rodstvo, words: [верба, вербальный, вербовать], answer: "все разные: гнуть, говорить, поворачивать"}
-- {poll: 262, post: 264, kind: rodstvo, words: [мышь, мышца, мышление], answer: "родственны мышь и мышца — мускул и мышца суть одно"}
-- {poll: 270, post: 271, kind: rodstvo, words: [работа, робот, робеть], answer: "все родственны — через *orbъ «сирота, слуга»"}
-- {poll: 281, post: 282, kind: rodstvo, words: [жёлтый, зелёный, жёлудь], answer: "родственны жёлтый и зелёный — PIE *ǵʰelh₃-"}
-- {poll: 289, post: 290, kind: rodstvo, words: [творог, ватрушка, вертеть], answer: "все разного происхождения; ватрушка скорее от «огня», чем от творога"}
-- {poll: 299, post: 300, kind: other, words: [пельмень], answer: "«хлебное ухо»: удм. пель «ухо» + нянь «хлеб»"}
-- {poll: 309, post: 310, kind: rodstvo, words: [барбекю, ломбард, брадобрей], answer: "родственны ломбард и брадобрей — оба от «бороды»"}
-- {poll: 319, post: 320, kind: rodstvo, words: [барбарис, барбитурат, варвар], answer: "барбитураты и варвары точно; возможно, и все три"}
-- {poll: 330, post: 331, kind: rodstvo, words: [биссектриса, секс, секира], answer: "все родственны — PIE *sek- «резать»"}
-- {poll: 339, post: 341, kind: rodstvo, words: [милиция, миля, милитаризм], answer: "родственны милиция и милитаризм"}
-- {poll: 352, post: 353, kind: rodstvo, words: [кафе, кофе, кафедра], answer: "родственны кофе и кафе — от араб. qahwa"}
-- {poll: 361, post: 362, kind: rodstvo, words: [блондин, блендер, блуд], answer: "все родственны — PIE *bʰlendʰ- «смешивать»"}
-- {poll: 370, post: 371, kind: rodstvo, words: [чеснок, коса, костёр], answer: "родственны чеснок и коса — PIE *kes- «чесать»"}
-- {poll: 381, post: 382, kind: lishnee, words: [вольфрам, вулкан, люпин, волк, лицей], answer: "лишний вулкан — остальные волчьи"}
-- {poll: 398, post: 399, kind: rodstvo, words: [хоббит, хобби, хип-хоп], answer: "родственны хобби и хип-хоп — от «прыгать»"}
-- {poll: 407, post: 409, kind: rodstvo, words: [Австрия, Австралия, утро], answer: "все родственны — PIE *h₂ews- «рассвет»"}
-- {poll: 419, post: 420, kind: rodstvo, words: [долина, доля, доллар], answer: "родственны долина и доллар — через Иоахимсталь"}
-- {poll: 435, post: 436, kind: lishnee, words: [вакансия, вакцина, вакуум, вакуоль, эвакуация], answer: "лишняя вакцина — она от коровы"}
-- {poll: 444, post: 445, kind: rodstvo, words: [плацента, плацебо, плацкарт], answer: "плацента и плацкарт; по версии Покорного — все три"}
-- {poll: 451, post: 452, kind: rodstvo, words: [малахит, мальва, маршмеллоу], answer: "мальва и маршмеллоу точно, малахит скорее всего тоже"}
-- {poll: 460, post: 461, kind: lishnee, words: [перловка, перила, перлы, перламутр, "Перл Харбор"], answer: "лишние перила — от «переть, опираться»"}
-- {poll: 467, post: 468, kind: lishnee, words: [мэр, магистр, майор, мэтр, министр, мастер], answer: "лишний министр — он «меньший», слуга"}
-- {poll: 476, post: 478, kind: lishnee, words: [патриарх, Клеопатра, патрон, патруль, патриот], answer: "лишний патруль — от patte «лапа»"}
-- {poll: 484, post: 492, kind: rodstvo, words: [блог, логарифм, каталог], answer: "родственны каталог и логарифм — λόγος"}
-- {poll: 493, post: 494, kind: lishnee, words: [линия, линять, лён, линолеум, линкор], answer: "лишнее линять"}
-- {poll: 502, post: 503, kind: lishnee, words: [капитан, капюшон, капуцин, капилляр, капучино, каперсы, каприз], answer: "лишние каперсы (и, возможно, каприз) — остальные от caput «голова»"}
-- {poll: 519, post: 521, kind: rodstvo, words: [дьявол, пароль, парабола], answer: "все родственны — βάλλω «бросать»"}
-- {poll: 537, post: 538, kind: rodstvo, words: [одеколон, колоноскопия, колония], answer: "родственны колония и одеколон — вода из Кёльна"}
-- {poll: 546, post: 547, kind: rodstvo, words: [портфель, трюфель, картофель], answer: "родственны трюфель и картофель — лат. tuber «клубень»"}
-- {poll: 557, post: 558, kind: rodstvo, words: [pen, pencil, penicillin], answer: "pencil и penicillin (от «кисточки»), pen — от «пера»"}
-- {poll: 566, post: 574, kind: rodstvo, words: [ферма, фирма, фермент], answer: "родственны ферма и фирма — лат. firmus «крепкий»"}
-- {poll: 575, post: 577, kind: rodstvo, words: [десна, десница, тесно], answer: "смотря какая десна: река-десна и десница вместе, десна во рту — отдельно"}
-- {poll: 591, post: 592, kind: rodstvo, words: [морфин, формула, формалин], answer: "формалин отдельно (от муравья); морфин и формула — возможно, вместе"}
-- {poll: 608, post: 609, kind: lishnee, words: [гранат, граната, грант, гранит, гранола], answer: "лишний грант — он от «сердца», остальные от зерна"}
-- {poll: 628, post: 630, kind: rodstvo, words: [альбатрос, альбинос, Албания], answer: "скорее всего все три разные"}
-- {poll: 638, post: 639, kind: lishnee, words: [anger, ангина, anxiety, Англия, anguish, angle, Angst, узкий], answer: "задумывался angle, но лишних, кажется, нет"}
-- {poll: 656, post: 657, kind: rodstvo, words: [Швеция, свадьба, Швейцария], answer: "Швеция и свадьба — «свои»; Швейцария — «поджигатели»"}
-- {poll: 669, post: 670, kind: lishnee, words: [human, chameleon, humus, humour, chthonic, hommage], answer: "лишний humour — он «жидкий», остальные «земляные»"}
-- {poll: 690, post: 691, kind: rodstvo, words: [круассан, крещендо, крещение], answer: "круассан и крещендо «растут», крещение — от «мазать»"}
-- {poll: 706, post: 707, kind: rodstvo, words: [сметана, Schmetterling, smell], answer: "сметана и Schmetterling вместе, smell горит отдельно"}
-- {poll: 714, post: 715, kind: rodstvo, words: [шампунь, шампанское, чемпион], answer: "шампанское и чемпион — оба от campus «поле»"}
-- {poll: 768, post: 769, kind: rodstvo, words: [слава, славяне, slave], answer: "slave точно от славян; слава и славяне — либо «слово», либо Днепр"}
-- {poll: 779, post: 780, kind: rodstvo, words: [кровать, кров, Krawatte], answer: "все три разного происхождения"}
-- {poll: 791, post: 792, kind: rodstvo, words: [мандарин, мантра, мандрагора], answer: "мандарин и мантра — от PIE *men- «думать»"}
-- {poll: 799, post: 809, kind: lishnee, words: [гель, колодец, желе, холодец, chill], answer: "лишних нет — все про холод (хотя о холодце можно спорить)"}
-- {poll: 816, post: 819, kind: rodstvo, words: [сарказм, саркофаг, саркома], answer: "все от σάρξ «плоть»"}
-- {poll: 827, post: 828, kind: lishnee, words: [белый, black, бланк, фламинго, blue, флегматик], answer: "белый, бланк, флегматик и скорее всего black — вместе; фламинго и blue туманны"}
-- {poll: 888, post: 889, kind: rodstvo, words: [жало, жалко, зло], answer: "жало и жалко вместе, если копать глубоко"}
+- {poll: 164, correct: 3, post: 166, kind: rodstvo, words: [фундук, фундамент, понтоваться], answer: "родственны фундук и понтоваться — оба от PIE *pónteh₁s «путь»"}
+- {poll: 170, correct: 2, post: 171, kind: rodstvo, words: [мошенник, мошка, мошонка], answer: "родственны мошенник и мошонка — от мошны «кошелёк»"}
+- {poll: 179, correct: 4, post: 180, kind: rodstvo, words: [лакримоза, лакрица, лакмус], answer: "все три разного происхождения"}
+- {poll: 183, correct: 4, post: 184, kind: rodstvo, words: [манипулировать, манная, манить], answer: "все разного происхождения (хотя про манить и манипулировать версия есть)"}
+- {poll: 191, correct: 2, post: 193, kind: rodstvo, words: [соль, солнце, сладкий], answer: "родственны соль и сладкий: солёный → вкусный → пряный → сладкий"}
+- {poll: 208, correct: 2, post: 210, kind: rodstvo, words: [каракатица, каракули, окорок], answer: "родственны каракатица и окорок — от *korkъ «нога»"}
+- {poll: 241, correct: 4, post: 243, kind: rodstvo, words: [набухать, бухта, буханка], answer: "все разного происхождения"}
+- {poll: 247, correct: 4, post: 248, kind: rodstvo, words: [оранжевый, рыжий, орангутан], answer: "все разного происхождения"}
+- {poll: 253, correct: 4, post: 254, kind: rodstvo, words: [верба, вербальный, вербовать], answer: "все разные: гнуть, говорить, поворачивать"}
+- {poll: 262, correct: 1, post: 264, kind: rodstvo, words: [мышь, мышца, мышление], answer: "родственны мышь и мышца — мускул и мышца суть одно"}
+- {poll: 270, correct: 0, post: 271, kind: rodstvo, words: [работа, робот, робеть], answer: "все родственны — через *orbъ «сирота, слуга»"}
+- {poll: 281, correct: 1, post: 282, kind: rodstvo, words: [жёлтый, зелёный, жёлудь], answer: "родственны жёлтый и зелёный — PIE *ǵʰelh₃-"}
+- {poll: 289, correct: 4, post: 290, kind: rodstvo, words: [творог, ватрушка, вертеть], answer: "все разного происхождения; ватрушка скорее от «огня», чем от творога"}
+- {poll: 299, correct: 1, post: 300, kind: other, words: [пельмень], answer: "«хлебное ухо»: удм. пель «ухо» + нянь «хлеб»"}
+- {poll: 309, correct: 3, post: 310, kind: rodstvo, words: [барбекю, ломбард, брадобрей], answer: "родственны ломбард и брадобрей — оба от «бороды»"}
+- {poll: 319, correct: 3, post: 320, kind: rodstvo, words: [барбарис, барбитурат, варвар], answer: "барбитураты и варвары точно; возможно, и все три"}
+- {poll: 330, correct: 0, post: 331, kind: rodstvo, words: [биссектриса, секс, секира], answer: "все родственны — PIE *sek- «резать»"}
+- {poll: 339, correct: 2, post: 341, kind: rodstvo, words: [милиция, миля, милитаризм], answer: "родственны милиция и милитаризм"}
+- {poll: 352, correct: 1, post: 353, kind: rodstvo, words: [кафе, кофе, кафедра], answer: "родственны кофе и кафе — от араб. qahwa"}
+- {poll: 361, correct: 0, post: 362, kind: rodstvo, words: [блондин, блендер, блуд], answer: "все родственны — PIE *bʰlendʰ- «смешивать»"}
+- {poll: 370, correct: 1, post: 371, kind: rodstvo, words: [чеснок, коса, костёр], answer: "родственны чеснок и коса — PIE *kes- «чесать»"}
+- {poll: 381, correct: 1, post: 382, kind: lishnee, words: [вольфрам, вулкан, люпин, волк, лицей], answer: "лишний вулкан — остальные волчьи"}
+- {poll: 398, correct: 3, post: 399, kind: rodstvo, words: [хоббит, хобби, хип-хоп], answer: "родственны хобби и хип-хоп — от «прыгать»"}
+- {poll: 407, correct: 0, post: 409, kind: rodstvo, words: [Австрия, Австралия, утро], answer: "все родственны — PIE *h₂ews- «рассвет»"}
+- {poll: 419, correct: 2, post: 420, kind: rodstvo, words: [долина, доля, доллар], answer: "родственны долина и доллар — через Иоахимсталь"}
+- {poll: 435, correct: 1, post: 436, kind: lishnee, words: [вакансия, вакцина, вакуум, вакуоль, эвакуация], answer: "лишняя вакцина — она от коровы"}
+- {poll: 444, correct: 2, post: 445, kind: rodstvo, words: [плацента, плацебо, плацкарт], answer: "плацента и плацкарт; по версии Покорного — все три"}
+- {poll: 451, correct: 3, post: 452, kind: rodstvo, words: [малахит, мальва, маршмеллоу], answer: "мальва и маршмеллоу точно, малахит скорее всего тоже"}
+- {poll: 460, correct: 1, post: 461, kind: lishnee, words: [перловка, перила, перлы, перламутр, "Перл Харбор"], answer: "лишние перила — от «переть, опираться»"}
+- {poll: 467, correct: 4, post: 468, kind: lishnee, words: [мэр, магистр, майор, мэтр, министр, мастер], answer: "лишний министр — он «меньший», слуга"}
+- {poll: 476, correct: 3, post: 478, kind: lishnee, words: [патриарх, Клеопатра, патрон, патруль, патриот], answer: "лишний патруль — от patte «лапа»"}
+- {poll: 484, correct: 3, post: 492, kind: rodstvo, words: [блог, логарифм, каталог], answer: "родственны каталог и логарифм — λόγος"}
+- {poll: 493, correct: 1, post: 494, kind: lishnee, words: [линия, линять, лён, линолеум, линкор], answer: "лишнее линять"}
+- {poll: 502, correct: 5, post: 503, kind: lishnee, words: [капитан, капюшон, капуцин, капилляр, капучино, каперсы, каприз], answer: "лишние каперсы (и, возможно, каприз) — остальные от caput «голова»"}
+- {poll: 519, correct: 0, post: 521, kind: rodstvo, words: [дьявол, пароль, парабола], answer: "все родственны — βάλλω «бросать»"}
+- {poll: 537, correct: 2, post: 538, kind: rodstvo, words: [одеколон, колоноскопия, колония], answer: "родственны колония и одеколон — вода из Кёльна"}
+- {poll: 546, correct: 3, post: 547, kind: rodstvo, words: [портфель, трюфель, картофель], answer: "родственны трюфель и картофель — лат. tuber «клубень»"}
+- {poll: 557, correct: 3, post: 558, kind: rodstvo, words: [pen, pencil, penicillin], answer: "pencil и penicillin (от «кисточки»), pen — от «пера»"}
+- {poll: 566, correct: 1, post: 574, kind: rodstvo, words: [ферма, фирма, фермент], answer: "родственны ферма и фирма — лат. firmus «крепкий»"}
+- {poll: 575, correct: 1, post: 577, kind: rodstvo, words: [десна, десница, тесно], answer: "смотря какая десна: река-десна и десница вместе, десна во рту — отдельно"}
+- {poll: 591, correct: 1, post: 592, kind: rodstvo, words: [морфин, формула, формалин], answer: "формалин отдельно (от муравья); морфин и формула — возможно, вместе"}
+- {poll: 608, correct: 2, post: 609, kind: lishnee, words: [гранат, граната, грант, гранит, гранола], answer: "лишний грант — он от «сердца», остальные от зерна"}
+- {poll: 628, correct: 4, post: 630, kind: rodstvo, words: [альбатрос, альбинос, Албания], answer: "скорее всего все три разные"}
+- {poll: 638, correct: null, post: 639, kind: lishnee, words: [anger, ангина, anxiety, Англия, anguish, angle, Angst, узкий], answer: "задумывался angle, но лишних, кажется, нет"}
+- {poll: 656, correct: 1, post: 657, kind: rodstvo, words: [Швеция, свадьба, Швейцария], answer: "Швеция и свадьба — «свои»; Швейцария — «поджигатели»"}
+- {poll: 669, correct: 3, post: 670, kind: lishnee, words: [human, chameleon, humus, humour, chthonic, hommage], answer: "лишний humour — он «жидкий», остальные «земляные»"}
+- {poll: 690, correct: 1, post: 691, kind: rodstvo, words: [круассан, крещендо, крещение], answer: "круассан и крещендо «растут», крещение — от «мазать»"}
+- {poll: 706, correct: 1, post: 707, kind: rodstvo, words: [сметана, Schmetterling, smell], answer: "сметана и Schmetterling вместе, smell горит отдельно"}
+- {poll: 714, correct: 3, post: 715, kind: rodstvo, words: [шампунь, шампанское, чемпион], answer: "шампанское и чемпион — оба от campus «поле»"}
+- {poll: 768, correct: 3, post: 769, kind: rodstvo, words: [слава, славяне, slave], answer: "slave точно от славян; слава и славяне — либо «слово», либо Днепр"}
+- {poll: 779, correct: 4, post: 780, kind: rodstvo, words: [кровать, кров, Krawatte], answer: "все три разного происхождения"}
+- {poll: 791, correct: 1, post: 792, kind: rodstvo, words: [мандарин, мантра, мандрагора], answer: "мандарин и мантра — от PIE *men- «думать»"}
+- {poll: 799, correct: 5, post: 809, kind: lishnee, words: [гель, колодец, желе, холодец, chill], answer: "лишних нет — все про холод (хотя о холодце можно спорить)"}
+- {poll: 816, correct: 0, post: 819, kind: rodstvo, words: [сарказм, саркофаг, саркома], answer: "все от σάρξ «плоть»"}
+- {poll: 827, correct: 6, post: 828, kind: lishnee, words: [белый, black, бланк, фламинго, blue, флегматик], answer: "белый, бланк, флегматик и скорее всего black — вместе; фламинго и blue туманны"}
+- {poll: 888, correct: 1, post: 889, kind: rodstvo, words: [жало, жалко, зло], answer: "жало и жалко вместе, если копать глубоко"}
