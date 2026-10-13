@@ -140,8 +140,8 @@ def chart_months(substantive):
     px = months.index(peak_key) * step + step / 2
     label = (f'<text class="peaklabel" x="{px:.1f}" y="{PAD_T - 4:.0f}" '
              f'text-anchor="middle">{peak} за месяц</text>')
-    return (f'<figure class="chart" id="months"><figcaption>Постов по месяцам, '
-            f'{first[:4]}–{last[:4]} — столбик ведёт на первый пост месяца</figcaption>'
+    return (f'<figure class="chart" id="months"><figcaption>Посты по месяцам, '
+            f'{first[:4]}-{last[2:4]}</figcaption>'
             f'<div class="tip" id="mtip" hidden></div>'
             f'<svg viewBox="0 0 {W} {H}" role="img"'
             f' aria-label="Столбики: число постов в каждый месяц. Пик — {peak}.">'
