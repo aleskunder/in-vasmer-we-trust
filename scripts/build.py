@@ -2,6 +2,7 @@
 import html
 import json
 import re
+from collections import Counter
 from pathlib import Path
 
 import yaml
@@ -93,10 +94,107 @@ def shell(active, title, subtitle, body):
 ASSETS = ROOT / "assets"
 
 
+LANG_CANON = {
+    "лат": "латынь", "греч": "греческий", "нем": "немецкий", "англ": "английский",
+    "фр": "французский", "исп": "испанский", "ит": "итальянский", "пол": "польский",
+    "чеш": "чешский", "укр": "украинский", "белор": "белорусский", "блр": "белорусский",
+    "болг": "болгарский", "сербохорв": "сербохорватский", "серб": "сербский",
+    "хорв": "хорватский", "словен": "словенский", "словац": "словацкий",
+    "макед": "македонский", "литов": "литовский", "лит": "литовский",
+    "латв": "латышский", "санскр": "санскрит", "арм": "армянский",
+    "перс": "персидский", "араб": "арабский", "тур": "турецкий", "фин": "финский",
+    "эстон": "эстонский", "венг": "венгерский", "ирл": "ирландский",
+    "валл": "валлийский", "шотл": "шотландский", "норв": "норвежский",
+    "швед": "шведский", "дат": "датский", "голл": "голландский",
+    "нидерл": "голландский", "румын": "румынский", "груз": "грузинский",
+    "кит": "китайский", "яп": "японский", "хинди": "хинди", "коми": "коми",
+    "удм": "удмуртский", "баск": "баскский", "тамильск": "тамильский",
+    "ивр": "иврит", "осет": "осетинский", "алб": "албанский", "казах": "казахский",
+    "татар": "татарский", "гот": "готский", "готск": "готский", "тай": "тайский",
+}
+LANG_RE = re.compile(
+    r"(?<![А-Яа-яёA-Za-z])(?:др\.-|ст\.-|ср\.-)?("
+    + "|".join(sorted((re.escape(k) for k in LANG_CANON), key=len, reverse=True))
+    + r")\.?(?![А-Яа-яё])")
+
+
+def count_languages(substantive):
+    """Сколько раз каждый язык упомянут в постах."""
+    text = " ".join(p["text"] for p in substantive)
+    tally = Counter(LANG_CANON[m.group(1)] for m in LANG_RE.finditer(text))
+    return tally
+
+
+def chart_months(substantive):
+    """Колонки «постов в месяц». Одна серия — легенда не нужна."""
+    tally = Counter(p["date"][:7] for p in substantive)
+    first, last = min(tally), max(tally)
+    months = []
+    y, m = int(first[:4]), int(first[5:7])
+    while f"{y:04d}-{m:02d}" <= last:
+        months.append(f"{y:04d}-{m:02d}")
+        m += 1
+        if m == 13:
+            y, m = y + 1, 1
+    peak = max(tally.values())
+    W, H, PAD_B, PAD_T = 860, 150, 22, 16
+    step = W / len(months)
+    bw = min(24.0, step - 2)              # <=24px, 2px зазор поверхностью
+    plot = H - PAD_B - PAD_T
+    bars, ticks, seen = [], [], set()
+    for i, key in enumerate(months):
+        n = tally.get(key, 0)
+        x = i * step + (step - bw) / 2
+        if n:
+            h = max(3.0, plot * n / peak)
+            y0 = PAD_T + plot - h
+            r = min(4.0, bw / 2, h)       # 4px скругление сверху, низ квадратный
+            bars.append(
+                f'<path class="bar" d="M{x:.1f} {y0 + h:.1f}V{y0 + r:.1f}'
+                f'a{r:.1f} {r:.1f} 0 0 1 {r:.1f} -{r:.1f}h{bw - 2 * r:.1f}'
+                f'a{r:.1f} {r:.1f} 0 0 1 {r:.1f} {r:.1f}V{y0 + h:.1f}z">'
+                f'<title>{key}: {n} постов</title></path>')
+        year = key[:4]
+        if year not in seen:
+            seen.add(year)
+            ticks.append(f'<text class="tick" x="{i * step:.1f}" y="{H - 6}">{year}</text>')
+    peak_key = max(tally, key=lambda k: tally[k])
+    px = months.index(peak_key) * step + step / 2
+    label = (f'<text class="peaklabel" x="{px:.1f}" y="{PAD_T - 4:.0f}" '
+             f'text-anchor="middle">{peak} за месяц</text>')
+    return (f'<figure class="chart"><figcaption>Постов по месяцам, '
+            f'{first[:4]}–{last[:4]}</figcaption>'
+            f'<svg viewBox="0 0 {W} {H}" role="img"'
+            f' aria-label="Столбики: число постов в каждый месяц. Пик — {peak}.">'
+            f'<line class="axis" x1="0" y1="{H - PAD_B}" x2="{W}" y2="{H - PAD_B}"/>'
+            f'{"".join(bars)}{label}{"".join(ticks)}</svg></figure>')
+
+
+def chart_langs(substantive, top_n=12):
+    """Горизонтальные полосы: самые частые языки. Одна серия."""
+    tally = count_languages(substantive)
+    top = tally.most_common(top_n)
+    if not top:
+        return ""
+    peak = top[0][1]
+    rows = "".join(
+        f'<li><span class="l">{esc(name)}</span>'
+        f'<span class="track"><span class="fill" style="width:{100 * n / peak:.1f}%"></span></span>'
+        f'<span class="v">{n}</span></li>' for name, n in top)
+    rare = sorted(k for k, v in tally.items() if v <= 6)
+    tail = (f'<p class="raretail">Ещё в постах мелькали: {esc(", ".join(rare))}.</p>'
+            if rare else "")
+    return (f'<figure class="chart"><figcaption>Языки, на которые чаще всего '
+            f'ссылаются посты — всего их {len(tally)}</figcaption>'
+            f'<ol class="langs">{rows}</ol>{tail}</figure>')
+
+
 def render_entry(e):
     cls = "entry auto" if e.get("auto") else "entry"
-    root = f'<span class="r">{esc(e["r"])}</span>' if e.get("r") else ""
-    return (f'<div class="{cls}" data-w="{esc(e["w"].lower())}" '
+    root = (f'<button type="button" class="r" data-root="{esc(e["r"])}" '
+            f'title="показать всё гнездо">{esc(e["r"])}</button>') if e.get("r") else ""
+    return (f'<div class="{cls}" id="w-{abs(hash(e["w"])) % 10**8}" '
+            f'data-w="{esc(e["w"].lower())}" '
             f'data-g="{esc(e["g"].lower())}" data-r="{esc((e.get("r") or "").lower())}">'
             f'<span class="w">{esc(e["w"])}</span>{root} — '
             f'<span class="g">{esc(e["g"])}</span> '
@@ -158,18 +256,24 @@ def build():
 <ul class="cards">{cards}</ul>
 <h2>Свежее</h2>
 <ul class="recent">{recent}</ul>
+<h2>Как шёл канал</h2>
+{chart_months(substantive)}
+{chart_langs(substantive)}
 """
     (SITE / "index.html").write_text(
         shell("index.html", "Канал", "Указатель к каналу про этимологию", body), encoding="utf-8")
 
     # ---------- словарь ----------
-    out, cur = [], None
+    out, cur, letters = [], None, []
     for e in merged:
         b = bucket(e["w"])
         if b != cur:
             cur = b
-            out.append(f'<h2 class="letter">{esc(b)}</h2>')
+            letters.append(b)
+            out.append(f'<h2 class="letter" id="L{len(letters)}">{esc(b)}</h2>')
         out.append(render_entry(e))
+    az = "".join(f'<a href="#L{i}" data-letter="{esc(b)}">{esc(b)}</a>'
+                 for i, b in enumerate(letters, 1))
     js = """
 <script>
 const q=document.getElementById('q'),rows=[...document.querySelectorAll('.entry')],
@@ -199,11 +303,37 @@ function run(){
     h.classList.toggle('hidden',!any);
   }
   cnt.textContent=v?`${shown} из ${N}`:`${N} слов`;
+  for(const a of document.querySelectorAll('.azbar a')){
+    const h=document.querySelector(a.getAttribute('href'));
+    a.classList.toggle('off', !h || h.classList.contains('hidden'));
+  }
 }
 q.addEventListener('input',run);
+
+// корень в статье открывает всё гнездо
+document.addEventListener('click',ev=>{
+  const b=ev.target.closest('button.r'); if(!b)return;
+  q.value=b.dataset.root; run();
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+// случайное слово
+document.getElementById('rnd').addEventListener('click',()=>{
+  q.value='';run();
+  const r=rows[Math.floor(Math.random()*rows.length)];
+  r.scrollIntoView({behavior:'smooth',block:'center'});
+  r.classList.remove('flash');void r.offsetWidth;r.classList.add('flash');
+});
+
+// «/» фокусирует поиск
+document.addEventListener('keydown',ev=>{
+  if(ev.key==='/'&&document.activeElement!==q){ev.preventDefault();q.focus();}
+});
+
 const pre=new URLSearchParams(location.search).get('q');
 if(pre){q.value=pre;}
-run();q.focus({preventScroll:true});
+run();
+if(!('ontouchstart' in window)) q.focus({preventScroll:true});
 </script>"""
     body = f"""
 <h1>Словарь</h1>
@@ -211,7 +341,11 @@ run();q.focus({preventScroll:true});
 <label class="vh" for="q">Поиск по словарю</label>
 <input id="q" class="search" type="search" placeholder="кап, форточ, *wert- …"
        autocomplete="off" aria-describedby="cnt">
-<p class="count" id="cnt" role="status" aria-live="polite"></p>
+<div class="dictbar">
+  <p class="count" id="cnt" role="status" aria-live="polite"></p>
+  <button id="rnd" type="button" class="ghost">🎲 случайное слово</button>
+</div>
+<nav class="azbar" id="az" aria-label="Переход по алфавиту">{az}</nav>
 {''.join(out)}
 {js}
 """

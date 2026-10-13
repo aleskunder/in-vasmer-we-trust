@@ -126,3 +126,46 @@ h3{font-size:1.05rem;margin:0 0 .2rem}
   .top .wrap{padding-block:.6rem}
   .entry .src{display:block;white-space:normal}
 }
+
+/* --- словарь: панель, полоса букв, подсветка --- */
+.dictbar{display:flex;align-items:baseline;gap:1rem;margin:0 0 .5rem}
+.dictbar .count{margin:0}
+.ghost{margin-left:auto;font:inherit;font-size:.85rem;cursor:pointer;color:var(--dim);
+  background:none;border:1px solid var(--line);border-radius:7px;padding:.25rem .6rem}
+.ghost:hover{color:var(--accent);border-color:var(--accent)}
+.azbar{display:flex;flex-wrap:wrap;gap:.25rem;margin:0 0 1.2rem;
+  position:sticky;top:3.1rem;z-index:3;background:var(--bg);padding:.4rem 0}
+.azbar a{text-decoration:none;color:var(--dim);font-size:.85rem;line-height:1;
+  border:1px solid var(--line);border-radius:6px;padding:.2rem .4rem;min-width:1.6em;
+  text-align:center;background:var(--panel)}
+.azbar a:hover{color:var(--accent);border-color:var(--accent)}
+.azbar a.off{opacity:.3;pointer-events:none}
+button.r{font:inherit;font-size:.82rem;cursor:pointer;background:var(--chip);
+  border:1px solid transparent;border-radius:6px;padding:.05em .45em;color:var(--dim);
+  margin-left:.3rem;white-space:nowrap}
+button.r:hover{color:var(--accent);border-color:var(--accent)}
+@keyframes flash{from{background:var(--accent-soft)}to{background:transparent}}
+.entry.flash{animation:flash 1.4s ease-out}
+
+/* --- графика --- */
+.chart{margin:1.2rem 0 1.8rem;padding:0}
+.chart figcaption{color:var(--dim);font-size:.88rem;margin:0 0 .6rem}
+.chart svg{width:100%;height:auto;display:block;overflow:visible}
+.chart .bar{fill:var(--accent)}
+.chart .bar:hover{fill:var(--ink)}
+.chart .axis{stroke:var(--line);stroke-width:1}
+.chart .tick{fill:var(--dim);font-size:11px;font-family:inherit}
+.chart .peaklabel{fill:var(--dim);font-size:11px;font-family:inherit}
+.langs{list-style:none;margin:0;padding:0;display:grid;gap:.3rem}
+.langs li{display:grid;grid-template-columns:8.5rem 1fr 2.5rem;gap:.6rem;
+  align-items:center;font-size:.9rem}
+.langs .l{color:var(--ink)}
+.langs .track{background:var(--chip);border-radius:4px;height:14px;overflow:hidden}
+.langs .fill{display:block;height:100%;background:var(--accent);
+  border-radius:0 4px 4px 0}
+.langs .v{color:var(--dim);font-variant-numeric:tabular-nums;text-align:right}
+.raretail{color:var(--dim);font-size:.88rem;margin:.8rem 0 0;max-width:62ch}
+@media (max-width:520px){
+  .langs li{grid-template-columns:7rem 1fr 2.2rem;font-size:.85rem}
+  .azbar{top:2.8rem}
+}
