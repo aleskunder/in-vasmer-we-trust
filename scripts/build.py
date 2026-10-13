@@ -28,6 +28,8 @@ def link(pid):
 
 
 ALPHABET = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЭЮЯ"
+MONTHS = ("январь", "февраль", "март", "апрель", "май", "июнь", "июль",
+          "август", "сентябрь", "октябрь", "ноябрь", "декабрь")
 
 
 def bucket(word):
@@ -94,40 +96,12 @@ def shell(active, title, subtitle, body):
 ASSETS = ROOT / "assets"
 
 
-LANG_CANON = {
-    "лат": "латынь", "греч": "греческий", "нем": "немецкий", "англ": "английский",
-    "фр": "французский", "исп": "испанский", "ит": "итальянский", "пол": "польский",
-    "чеш": "чешский", "укр": "украинский", "белор": "белорусский", "блр": "белорусский",
-    "болг": "болгарский", "сербохорв": "сербохорватский", "серб": "сербский",
-    "хорв": "хорватский", "словен": "словенский", "словац": "словацкий",
-    "макед": "македонский", "литов": "литовский", "лит": "литовский",
-    "латв": "латышский", "санскр": "санскрит", "арм": "армянский",
-    "перс": "персидский", "араб": "арабский", "тур": "турецкий", "фин": "финский",
-    "эстон": "эстонский", "венг": "венгерский", "ирл": "ирландский",
-    "валл": "валлийский", "шотл": "шотландский", "норв": "норвежский",
-    "швед": "шведский", "дат": "датский", "голл": "голландский",
-    "нидерл": "голландский", "румын": "румынский", "груз": "грузинский",
-    "кит": "китайский", "яп": "японский", "хинди": "хинди", "коми": "коми",
-    "удм": "удмуртский", "баск": "баскский", "тамильск": "тамильский",
-    "ивр": "иврит", "осет": "осетинский", "алб": "албанский", "казах": "казахский",
-    "татар": "татарский", "гот": "готский", "готск": "готский", "тай": "тайский",
-}
-LANG_RE = re.compile(
-    r"(?<![А-Яа-яёA-Za-z])(?:др\.-|ст\.-|ср\.-)?("
-    + "|".join(sorted((re.escape(k) for k in LANG_CANON), key=len, reverse=True))
-    + r")\.?(?![А-Яа-яё])")
-
-
-def count_languages(substantive):
-    """Сколько раз каждый язык упомянут в постах."""
-    text = " ".join(p["text"] for p in substantive)
-    tally = Counter(LANG_CANON[m.group(1)] for m in LANG_RE.finditer(text))
-    return tally
-
-
 def chart_months(substantive):
     """Колонки «постов в месяц». Одна серия — легенда не нужна."""
     tally = Counter(p["date"][:7] for p in substantive)
+    firstpost = {}
+    for post in sorted(substantive, key=lambda x: x["id"]):
+        firstpost.setdefault(post["date"][:7], post["id"])
     first, last = min(tally), max(tally)
     months = []
     y, m = int(first[:4]), int(first[5:7])
@@ -150,10 +124,14 @@ def chart_months(substantive):
             y0 = PAD_T + plot - h
             r = min(4.0, bw / 2, h)       # 4px скругление сверху, низ квадратный
             bars.append(
+                f'<a class="barlink" href="{link(firstpost[key])}" '
+                f'data-m="{MONTHS[int(key[5:7]) - 1]} {key[:4]}" data-n="{n}">'
+                # прозрачная подложка во всю высоту — попасть мышью в тонкий столбик трудно
+                f'<rect class="hit" x="{i * step:.1f}" y="{PAD_T}" '
+                f'width="{step:.1f}" height="{plot:.1f}"/>'
                 f'<path class="bar" d="M{x:.1f} {y0 + h:.1f}V{y0 + r:.1f}'
                 f'a{r:.1f} {r:.1f} 0 0 1 {r:.1f} -{r:.1f}h{bw - 2 * r:.1f}'
-                f'a{r:.1f} {r:.1f} 0 0 1 {r:.1f} {r:.1f}V{y0 + h:.1f}z">'
-                f'<title>{key}: {n} постов</title></path>')
+                f'a{r:.1f} {r:.1f} 0 0 1 {r:.1f} {r:.1f}V{y0 + h:.1f}z"/></a>')
         year = key[:4]
         if year not in seen:
             seen.add(year)
@@ -162,31 +140,13 @@ def chart_months(substantive):
     px = months.index(peak_key) * step + step / 2
     label = (f'<text class="peaklabel" x="{px:.1f}" y="{PAD_T - 4:.0f}" '
              f'text-anchor="middle">{peak} за месяц</text>')
-    return (f'<figure class="chart"><figcaption>Постов по месяцам, '
-            f'{first[:4]}–{last[:4]}</figcaption>'
+    return (f'<figure class="chart" id="months"><figcaption>Постов по месяцам, '
+            f'{first[:4]}–{last[:4]} — столбик ведёт на первый пост месяца</figcaption>'
+            f'<div class="tip" id="mtip" hidden></div>'
             f'<svg viewBox="0 0 {W} {H}" role="img"'
             f' aria-label="Столбики: число постов в каждый месяц. Пик — {peak}.">'
             f'<line class="axis" x1="0" y1="{H - PAD_B}" x2="{W}" y2="{H - PAD_B}"/>'
             f'{"".join(bars)}{label}{"".join(ticks)}</svg></figure>')
-
-
-def chart_langs(substantive, top_n=12):
-    """Горизонтальные полосы: самые частые языки. Одна серия."""
-    tally = count_languages(substantive)
-    top = tally.most_common(top_n)
-    if not top:
-        return ""
-    peak = top[0][1]
-    rows = "".join(
-        f'<li><span class="l">{esc(name)}</span>'
-        f'<span class="track"><span class="fill" style="width:{100 * n / peak:.1f}%"></span></span>'
-        f'<span class="v">{n}</span></li>' for name, n in top)
-    rare = sorted(k for k, v in tally.items() if v <= 6)
-    tail = (f'<p class="raretail">Ещё в постах мелькали: {esc(", ".join(rare))}.</p>'
-            if rare else "")
-    return (f'<figure class="chart"><figcaption>Языки, на которые чаще всего '
-            f'ссылаются посты — всего их {len(tally)}</figcaption>'
-            f'<ol class="langs">{rows}</ol>{tail}</figure>')
 
 
 def render_entry(e):
@@ -236,10 +196,12 @@ def build():
         f'<p>{esc(" ".join(s["blurb"].split()))}</p>'
         f'<span class="when">{esc(s["period"])} · {len(s["posts"])} постов</span></li>'
         for s in series if s.get("index", True))
+    # навигационный пост ссылается на сам сайт — в «Свежем» ему не место
+    selfless = [p for p in substantive if SITE_URL not in p["text"]]
     recent = "".join(
         f'<li><a href="{link(p["id"])}">{esc(p["text"].split(chr(10))[0][:70])}</a> '
         f'<span class="when">{p["date"][:10]}</span></li>'
-        for p in sorted(substantive, key=lambda p: p["id"], reverse=True)[:8])
+        for p in sorted(selfless, key=lambda p: p["id"], reverse=True)[:8])
     body = f"""
 <h1>In Vasmer We Trust</h1>
 <p class="lede">Указатель к <a href="https://t.me/{CH}">@{CH}</a> — каналу
@@ -258,7 +220,24 @@ def build():
 <ul class="recent">{recent}</ul>
 <h2>Как шёл канал</h2>
 {chart_months(substantive)}
-{chart_langs(substantive)}
+<script>
+(()=>{{
+  const tip=document.getElementById('mtip'),fig=document.getElementById('months');
+  if(!tip||!fig)return;
+  for(const a of fig.querySelectorAll('.barlink')){{
+    a.addEventListener('pointerenter',()=>{{
+      tip.textContent=a.dataset.m+' — '+a.dataset.n+' постов';
+      tip.hidden=false;
+    }});
+    a.addEventListener('pointermove',ev=>{{
+      const b=fig.getBoundingClientRect();
+      tip.style.left=(ev.clientX-b.left)+'px';
+      tip.style.top=(ev.clientY-b.top)+'px';
+    }});
+    a.addEventListener('pointerleave',()=>{{tip.hidden=true;}});
+  }}
+}})();
+</script>
 """
     (SITE / "index.html").write_text(
         shell("index.html", "Канал", "Указатель к каналу про этимологию", body), encoding="utf-8")
