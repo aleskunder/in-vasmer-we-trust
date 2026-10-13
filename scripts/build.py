@@ -136,17 +136,13 @@ def chart_months(substantive):
         if year not in seen:
             seen.add(year)
             ticks.append(f'<text class="tick" x="{i * step:.1f}" y="{H - 6}">{year}</text>')
-    peak_key = max(tally, key=lambda k: tally[k])
-    px = months.index(peak_key) * step + step / 2
-    label = (f'<text class="peaklabel" x="{px:.1f}" y="{PAD_T - 4:.0f}" '
-             f'text-anchor="middle">{peak} за месяц</text>')
     return (f'<figure class="chart" id="months"><figcaption>Посты по месяцам, '
             f'{first[:4]}-{last[2:4]}</figcaption>'
             f'<div class="tip" id="mtip" hidden></div>'
             f'<svg viewBox="0 0 {W} {H}" role="img"'
             f' aria-label="Столбики: число постов в каждый месяц. Пик — {peak}.">'
             f'<line class="axis" x1="0" y1="{H - PAD_B}" x2="{W}" y2="{H - PAD_B}"/>'
-            f'{"".join(bars)}{label}{"".join(ticks)}</svg></figure>')
+            f'{"".join(bars)}{"".join(ticks)}</svg></figure>')
 
 
 def render_entry(e):

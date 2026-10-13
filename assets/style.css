@@ -161,7 +161,6 @@ button.r:hover{color:var(--accent);border-color:var(--accent)}
   padding:.25rem .5rem;border-radius:6px;white-space:nowrap;z-index:2}
 .chart .axis{stroke:var(--line);stroke-width:1}
 .chart .tick{fill:var(--dim);font-size:11px;font-family:inherit}
-.chart .peaklabel{fill:var(--dim);font-size:11px;font-family:inherit}
 @media (max-width:520px){
   .azbar{top:2.8rem}
 }
