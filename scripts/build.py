@@ -73,7 +73,7 @@ def shell(active, title, subtitle, body, extra_head=""):
 </main>
 <footer class="wrap">
   <p>Указатель к телеграм-каналу <a href="https://t.me/{CH}">@{CH}</a>.
-  Обновляется автоматически: как только в канале выходит пост, он попадает сюда.</p>
+  Обновляется полуавтоматически по мере появления постов и навайбкоживания фичей.</p>
 </footer>
 </body></html>
 """
@@ -198,7 +198,7 @@ def build():
         f'<li class="card"><h3><a href="{BASE}/serii.html#{esc(s["id"])}">{esc(s["title"])}</a></h3>'
         f'<p>{esc(" ".join(s["blurb"].split()))}</p>'
         f'<span class="when">{esc(s["period"])} · {len(s["posts"])} постов</span></li>'
-        for s in series)
+        for s in series if s.get("index", True))
     recent = "".join(
         f'<li><a href="{link(p["id"])}">{esc(p["text"].split(chr(10))[0][:70])}</a> '
         f'<span class="when">{p["date"][:10]}</span></li>'
@@ -206,9 +206,8 @@ def build():
     body = f"""
 <h1>In Vasmer We Trust</h1>
 <p class="lede">Указатель к <a href="https://t.me/{CH}">@{CH}</a> — каналу
-про этимологию и случайные штуки рядом с ней. Здесь можно найти разбор
-конкретного слова, пройти по сюжетным циклам целиком или посмотреть,
-какие слова сошлись на одном праиндоевропейском корне.</p>
+про этимологию и случайные штуки. Здесь лежат ссылки на разборы
+конкретных слов, сюжетные циклы + праиндоевропейские корни.</p>
 <ul class="stats">
   <li><b>{len(substantive)}</b> постов</li>
   <li><b>{len(merged)}</b> слов в словаре</li>
@@ -261,8 +260,7 @@ run();q.focus({preventScroll:true});
 </script>"""
     body = f"""
 <h1>Словарь</h1>
-<p class="lede">Все слова, которые разбирались в канале, и заметные родственники,
-ради которых разборы и писались. Поиск идёт и по слову, и по глоссе, и по корню.</p>
+<p class="lede">Все слова, которые разбирались в канале. Поиск по слову / глоссе / корню.</p>
 <input id="q" class="search" type="search" placeholder="кап, форточ, *wert- …" autocomplete="off">
 <p class="count" id="cnt"></p>
 {''.join(out)}
@@ -289,10 +287,7 @@ run();q.focus({preventScroll:true});
             f'<span class="n">{len(ws)}</span></div><ul class="chips">{chips}</ul></div>')
     body = f"""
 <h1>Корни</h1>
-<p class="lede">{len(order)} прото-корней, до которых добрались посты, — от самых
-многолюдных к одиночкам. Один корень часто всплывал в разные годы в разных
-сюжетах: <code>*wert-</code> — и в творожном посте 2022-го, и в немецком
-<i>werden</i> четыре года спустя.</p>
+<p class="lede">{len(order)} прото-корней, до которых добрались посты.</p>
 {''.join(blocks)}
 """
     (SITE / "korni.html").write_text(

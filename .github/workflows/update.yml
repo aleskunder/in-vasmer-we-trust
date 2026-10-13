@@ -37,13 +37,13 @@ jobs:
       - name: Собрать сайт
         run: python scripts/build.py
 
-      - name: Закоммитить архив, если он пополнился
+      - name: Закоммитить архив, если он изменился
         run: |
           git config user.name  "aleskunder"
           git config user.email "aleskunder@gmail.com"
           if [[ -n "$(git status --porcelain data/)" ]]; then
             git add data/
-            git commit -m "data: новые посты из канала"
+            git commit -m "data: обновление архива канала"
             git push
           else
             echo "новых постов нет"

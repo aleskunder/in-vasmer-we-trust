@@ -75,12 +75,21 @@ def main():
             auto.append({k: v for k, v in cand.items() if v is not None})
 
     out = DATA / "entries.auto.yml"
-    header = ("# Автоматически извлечённые кандидаты. Не редактируй здесь —\n"
+    header = ("# Автоматически извлечённые кандидаты.\n"
               "# файл перезаписывается при каждом прогоне. Хорошую статью\n"
-              "# перенеси в entries.yml, и отсюда она пропадёт.\n")
-    out.write_text(header + yaml.safe_dump(auto, allow_unicode=True, sort_keys=False,
-                                           default_flow_style=False),
-                   encoding="utf-8")
+              "# перенести в entries.yml, и отсюда она пропадёт.\n")
+    body = yaml.safe_dump(auto, allow_unicode=True, sort_keys=False,
+                          default_flow_style=False)
+
+    # Переписываем файл только если изменился СОСТАВ кандидатов.
+    # Иначе каждый прогон трогал бы файл вхолостую, и cron коммитил бы
+    # пустые правки (а заодно затирал ручные правки шапки).
+    previous = yaml.safe_load(out.read_text(encoding="utf-8")) if out.exists() else None
+    if (previous or []) == auto and out.exists():
+        print(f"{len(auto)} авто-кандидатов — без изменений, файл не трогаю")
+        return
+
+    out.write_text(header + body, encoding="utf-8")
     print(f"{len(auto)} авто-кандидатов из {len(posts)} постов -> {out.name}")
 
 
