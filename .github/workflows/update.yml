@@ -37,6 +37,9 @@ jobs:
       - name: Собрать сайт
         run: python scripts/build.py
 
+      - name: Проверить данные и собранный сайт
+        run: python scripts/check.py
+
       - name: Закоммитить архив, если он изменился
         run: |
           git config user.name  "aleskunder"

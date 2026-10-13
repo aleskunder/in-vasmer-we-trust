@@ -2,7 +2,6 @@
 import html
 import json
 import re
-import shutil
 from pathlib import Path
 
 import yaml
@@ -12,6 +11,7 @@ DATA = ROOT / "data"
 SITE = ROOT / "site"
 CH = "ethimologie"
 BASE = "/in-vasmer-we-trust"   # префикс GitHub Pages; "" для корня
+SITE_URL = "https://aleskunder.github.io" + BASE
 
 
 def load(name):
@@ -49,7 +49,7 @@ PAGES = [("index.html", "Канал"), ("slovar.html", "Словарь"),
          ("oprosy.html", "Опросы")]
 
 
-def shell(active, title, subtitle, body, extra_head=""):
+def shell(active, title, subtitle, body):
     nav = "".join(
         f'<a href="{BASE}/{href}" class="{"on" if href == active else ""}">{esc(label)}</a>'
         for href, label in PAGES)
@@ -59,9 +59,19 @@ def shell(active, title, subtitle, body, extra_head=""):
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{esc(title)} — In Vasmer We Trust</title>
 <meta name="description" content="{esc(subtitle)}">
+<link rel="canonical" href="{SITE_URL}/{active}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="In Vasmer We Trust">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:title" content="{esc(title)} — In Vasmer We Trust">
+<meta property="og:description" content="{esc(subtitle)}">
+<meta property="og:url" content="{SITE_URL}/{active}">
+<meta property="og:image" content="{SITE_URL}/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="{BASE}/style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='14'>📖</text></svg>">
-{extra_head}
 </head><body>
 <header class="top">
   <div class="wrap">
@@ -80,127 +90,7 @@ def shell(active, title, subtitle, body, extra_head=""):
 """
 
 
-CSS = """
-:root{
-  --bg:#fbf8f3; --panel:#fff; --ink:#23201c; --dim:#6d665d; --line:#e4ddd1;
-  --accent:#8a4b2a; --accent-soft:#f0e3d8; --chip:#f3ece2;
-}
-@media (prefers-color-scheme:dark){
-  :root{
-    --bg:#16140f; --panel:#1e1b16; --ink:#ece6dc; --dim:#9a9184; --line:#312c24;
-    --accent:#d99b6c; --accent-soft:#2d241c; --chip:#272118;
-  }
-}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);
-  font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
-  -webkit-text-size-adjust:100%}
-.wrap{max-width:860px;margin:0 auto;padding:0 20px}
-a{color:var(--accent)}
-h1,h2,h3{font-family:Georgia,"Iowan Old Style","Times New Roman",serif;font-weight:600;line-height:1.25}
-h1{font-size:2rem;margin:.2em 0 .1em}
-h2{font-size:1.35rem;margin:2.2rem 0 .6rem}
-h3{font-size:1.05rem;margin:0 0 .2rem}
-
-.top{border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:5}
-.top .wrap{display:flex;flex-wrap:wrap;gap:.4rem 1.2rem;align-items:baseline;padding-block:.8rem}
-.brand{font-family:Georgia,serif;font-weight:600;text-decoration:none;color:var(--ink);font-size:1.05rem}
-.top nav{display:flex;gap:1rem;margin-left:auto;flex-wrap:wrap}
-.top nav a{text-decoration:none;color:var(--dim);font-size:.93rem}
-.top nav a.on,.top nav a:hover{color:var(--accent)}
-
-.lede{color:var(--dim);font-size:1.05rem;max-width:62ch}
-.stats{display:flex;flex-wrap:wrap;gap:.5rem 1.6rem;color:var(--dim);font-size:.9rem;
-  margin:1.2rem 0 0;padding:0;list-style:none}
-.stats b{color:var(--ink);font-weight:600}
-
-.search{width:100%;padding:.75rem .9rem;font:inherit;color:var(--ink);
-  background:var(--panel);border:1px solid var(--line);border-radius:10px;margin:1rem 0 .4rem}
-.search:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
-.count{color:var(--dim);font-size:.88rem;margin:0 0 1.2rem}
-
-.cards{display:grid;gap:.9rem;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
-  padding:0;list-style:none;margin:1rem 0}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:1rem 1.1rem}
-.card h3 a{text-decoration:none}
-.card p{margin:.35rem 0 0;color:var(--dim);font-size:.92rem}
-.card .when{display:block;color:var(--dim);font-size:.8rem;margin-top:.5rem}
-
-.letter{font-family:Georgia,serif;font-size:1.5rem;color:var(--accent);
-  margin:1.8rem 0 .5rem;padding-bottom:.2rem;border-bottom:1px solid var(--line)}
-.entry{padding:.5rem 0;border-bottom:1px solid var(--line)}
-.entry .w{font-weight:600}
-.entry .g{color:var(--dim)}
-.entry .r{display:inline-block;background:var(--chip);border-radius:6px;padding:.05em .45em;
-  font-size:.82rem;color:var(--dim);margin-left:.3rem;white-space:nowrap}
-.entry .src{font-size:.85rem;white-space:nowrap}
-.entry.auto .w::after{content:"авто";font-size:.7rem;background:var(--accent-soft);
-  color:var(--accent);border-radius:5px;padding:.1em .4em;margin-left:.4em;vertical-align:.1em}
-
-.root{background:var(--panel);border:1px solid var(--line);border-radius:12px;
-  padding:.9rem 1.1rem;margin:.7rem 0}
-.root .head{display:flex;flex-wrap:wrap;gap:.5rem;align-items:baseline}
-.root code{font-size:1.05rem;color:var(--accent);font-weight:600}
-.root .gl{color:var(--dim)}
-.root .n{margin-left:auto;color:var(--dim);font-size:.85rem}
-.chips{display:flex;flex-wrap:wrap;gap:.35rem;margin:.6rem 0 0;padding:0;list-style:none}
-.chips a{background:var(--chip);border-radius:7px;padding:.18em .55em;font-size:.9rem;
-  text-decoration:none;color:var(--ink)}
-.chips a:hover{background:var(--accent-soft);color:var(--accent)}
-
-.serie{margin:0 0 2rem}
-.serie .when{color:var(--dim);font-size:.85rem}
-.serie ol{margin:.7rem 0 0;padding-left:1.4rem}
-.serie li{margin:.25rem 0}
-.recent{list-style:none;padding:0;margin:.8rem 0}
-.recent li{display:flex;gap:1rem;align-items:baseline;padding:.4rem 0;border-bottom:1px solid var(--line)}
-.recent .when{margin-left:auto;color:var(--dim);font-size:.85rem;white-space:nowrap}
-.quiz{padding:.45rem 0;border-bottom:1px solid var(--line);font-size:.95rem}
-.quiz .ws{font-weight:600}
-.hidden{display:none !important}
-
-.qz{background:var(--panel);border:1px solid var(--line);border-radius:12px;
-  padding:1rem 1.1rem;margin:0 0 1rem}
-.qz .ws{font-family:Georgia,serif;font-size:1.15rem;margin:0 0 .1rem}
-.qz .kind{color:var(--dim);font-size:.8rem;margin:0 0 .7rem}
-.qz ol.opts{list-style:none;margin:0;padding:0;display:grid;gap:.4rem}
-.qz button{width:100%;text-align:left;font:inherit;color:var(--ink);cursor:pointer;
-  background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:.5rem .7rem}
-.qz button:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
-.qz button:disabled{cursor:default}
-.qz button.right{border-color:#2e7d52;background:color-mix(in srgb,#2e7d52 12%,var(--bg));color:var(--ink)}
-.qz button.wrong{border-color:#b3453a;background:color-mix(in srgb,#b3453a 12%,var(--bg));color:var(--ink)}
-.qz button .tick{float:right;font-weight:700}
-.qz .verdict{margin:.7rem 0 0;padding-top:.7rem;border-top:1px solid var(--line);font-size:.93rem}
-.qz .verdict b.ok{color:#2e7d52} .qz .verdict b.no{color:#b3453a}
-.scorebar{position:sticky;top:3.1rem;z-index:4;background:var(--panel);
-  border:1px solid var(--line);border-radius:10px;padding:.55rem .9rem;margin:1rem 0 1.4rem;
-  display:flex;gap:1rem;align-items:center;flex-wrap:wrap;font-size:.92rem}
-.scorebar b{font-size:1.05rem}
-.scorebar button{margin-left:auto;font:inherit;font-size:.85rem;color:var(--dim);cursor:pointer;
-  background:none;border:1px solid var(--line);border-radius:7px;padding:.25rem .6rem}
-.scorebar button:hover{color:var(--accent);border-color:var(--accent)}
-
-.nextbtn{font:inherit;cursor:pointer;color:var(--accent);background:var(--accent-soft);
-  border:1px solid var(--accent);border-radius:9px;padding:.55rem 1rem}
-.nextbtn:hover{background:var(--accent);color:var(--bg)}
-.alldone{color:var(--dim)}
-.qindex{list-style:none;margin:.6rem 0 0;padding:0;display:grid;gap:.3rem;
-  grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
-.qindex button{width:100%;text-align:left;font:inherit;font-size:.9rem;cursor:pointer;
-  color:var(--ink);background:var(--panel);border:1px solid var(--line);
-  border-radius:8px;padding:.35rem .5rem;display:flex;gap:.5rem;align-items:baseline}
-.qindex button:hover{border-color:var(--accent);color:var(--accent)}
-.qindex .num{color:var(--dim);font-size:.8rem;min-width:1.7em;flex:none}
-.qindex button.ok{border-color:#2e7d52;background:color-mix(in srgb,#2e7d52 10%,var(--panel))}
-.qindex button.no{border-color:#b3453a;background:color-mix(in srgb,#b3453a 10%,var(--panel))}
-.qindex button.cur{outline:2px solid var(--accent);outline-offset:1px}
-@media (max-width:520px){
-  h1{font-size:1.6rem}
-  .top .wrap{padding-block:.6rem}
-  .entry .src{display:block;white-space:normal}
-}
-"""
+ASSETS = ROOT / "assets"
 
 
 def render_entry(e):
@@ -228,8 +118,19 @@ def build():
     last = max(p["date"] for p in posts)[:10]
 
     SITE.mkdir(exist_ok=True)
-    (SITE / "style.css").write_text(CSS, encoding="utf-8")
+    (SITE / "style.css").write_text(
+        (ASSETS / "style.css").read_text(encoding="utf-8"), encoding="utf-8")
+    (SITE / "og.png").write_bytes((ASSETS / "og.png").read_bytes())
     (SITE / ".nojekyll").write_text("", encoding="utf-8")
+    (SITE / "robots.txt").write_text(
+        f"User-agent: *\nAllow: /\nSitemap: {SITE_URL}/sitemap.xml\n", encoding="utf-8")
+    today = __import__("datetime").date.today().isoformat()
+    (SITE / "sitemap.xml").write_text(
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        + "".join(f"  <url><loc>{SITE_URL}/{href}</loc>"
+                  f"<lastmod>{today}</lastmod></url>\n" for href, _ in PAGES)
+        + "</urlset>\n", encoding="utf-8")
 
     # ---------- главная ----------
     cards = "".join(
@@ -267,14 +168,22 @@ def build():
         b = bucket(e["w"])
         if b != cur:
             cur = b
-            out.append(f'<h2 class="letter" data-letter="1">{esc(b)}</h2>')
+            out.append(f'<h2 class="letter">{esc(b)}</h2>')
         out.append(render_entry(e))
     js = """
 <script>
 const q=document.getElementById('q'),rows=[...document.querySelectorAll('.entry')],
       heads=[...document.querySelectorAll('.letter')],cnt=document.getElementById('cnt');
 const N=rows.length;
-function norm(s){return s.toLowerCase().replace(/ё/g,'е');}
+const MAP={'ʰ':'h','ʲ':'j','ʷ':'w','ˠ':'g','ˡ':'l','ⁿ':'n',
+ '₁':'1','₂':'2','₃':'3','₄':'4','₅':'5','₆':'6',
+ '¹':'1','²':'2','³':'3','ħ':'h','ʕ':'',"ʔ":'',
+ 'ᵊ':'e','ʱ':'h'};
+function norm(s){
+  s=s.toLowerCase().replace(/ё/g,'е');
+  s=s.normalize('NFD').replace(/[̀-ͯ]/g,'');
+  return s.replace(/./g,c=>MAP[c]!==undefined?MAP[c]:c);
+}
 function run(){
   const v=norm(q.value.trim());
   let shown=0;
@@ -299,8 +208,10 @@ run();q.focus({preventScroll:true});
     body = f"""
 <h1>Словарь</h1>
 <p class="lede">Все слова, которые разбирались в канале. Поиск по слову / глоссе / корню.</p>
-<input id="q" class="search" type="search" placeholder="кап, форточ, *wert- …" autocomplete="off">
-<p class="count" id="cnt"></p>
+<label class="vh" for="q">Поиск по словарю</label>
+<input id="q" class="search" type="search" placeholder="кап, форточ, *wert- …"
+       autocomplete="off" aria-describedby="cnt">
+<p class="count" id="cnt" role="status" aria-live="polite"></p>
 {''.join(out)}
 {js}
 """
@@ -369,13 +280,14 @@ run();q.focus({preventScroll:true});
             f'<p class="ws">{esc(words)}</p>'
             f'<p class="kind">№{n} из {len(quizzes)} · {esc(KIND.get(q["kind"], ""))}</p>'
             f'<ol class="opts">{buttons}</ol>'
-            f'<p class="verdict hidden">'
+            f'<p class="verdict hidden" role="status" aria-live="polite">'
             f'<span class="mark"></span> {esc(q["answer"])} '
             f'<a href="{link(q["post"])}">разбор&nbsp;↗</a> · '
             f'<a href="{link(q["poll"])}">опрос в канале&nbsp;↗</a></p></div>')
         index_q.append(
             f'<li><button type="button" data-goto="{q["poll"]}">'
-            f'<span class="num">{n}</span>{esc(words)}</button></li>')
+            f'<span class="num">{n}</span><span class="t">{esc(words)}</span>'
+            f'<span class="st" aria-hidden="true"></span></button></li>')
 
     quiz_js = """
 <script>

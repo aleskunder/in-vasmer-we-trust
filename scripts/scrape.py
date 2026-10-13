@@ -23,6 +23,7 @@ WRAP = re.compile(r'<div class="tgme_widget_message_wrap', re.S)
 POST_ID = re.compile(r'data-post="[^/]+/(\d+)"')
 TEXT = re.compile(r'<div class="tgme_widget_message_text[^"]*"[^>]*>(.*?)</div>\s*(?:<div class="tgme_widget_message_(?:footer|reply_markup)|</div>)', re.S)
 DATE = re.compile(r'<time datetime="([^"]+)"')
+SERVICE = re.compile(r'tgme_widget_message[^"]*\bservice_message\b')
 MEDIA = re.compile(r'tgme_widget_message_(?:photo|video|document|poll)')
 
 
@@ -40,6 +41,9 @@ def parse_page(markup):
         m = POST_ID.search(chunk)
         if not m:
             continue
+        # служебные сообщения («канал закрепил …») постами не считаем
+        if SERVICE.search(chunk):
+            continue
         t = TEXT.search(chunk)
         d = DATE.search(chunk)
         out.append({
@@ -51,11 +55,19 @@ def parse_page(markup):
     return out
 
 
-def fetch(session, before=None):
+def fetch(session, before=None, attempts=3):
     url = f"https://t.me/s/{CHANNEL}"
-    r = session.get(url, params={"before": before} if before else None, timeout=30)
-    r.raise_for_status()
-    return r.text
+    params = {"before": before} if before else None
+    for attempt in range(1, attempts + 1):
+        try:
+            r = session.get(url, params=params, timeout=30)
+            r.raise_for_status()
+            return r.text
+        except requests.RequestException as exc:
+            if attempt == attempts:
+                raise
+            print(f"  попытка {attempt} не удалась ({exc}), повтор через {attempt * 5} с")
+            time.sleep(attempt * 5)
 
 
 def main(full=False):
@@ -71,8 +83,17 @@ def main(full=False):
     found, before, pages = {}, None, 0
     while pages < MAX_PAGES:
         pages += 1
-        batch = parse_page(fetch(session, before))
+        markup = fetch(session, before)
+        batch = parse_page(markup)
         if not batch:
+            # Канарейка: страница пришла, а постов в ней ноль — значит телеграм
+            # поменял разметку и регулярки больше не ловят. Молчать нельзя,
+            # иначе сайт будет годами показывать старое с зелёным прогоном.
+            if pages == 1 and len(markup) > 5000:
+                raise SystemExit(
+                    "разметка t.me/s изменилась: страница получена "
+                    f"({len(markup)} байт), но постов не распознано — "
+                    "почини парсер в scrape.py")
             break
         for p in batch:
             if p["id"] not in known and p["id"] not in found:

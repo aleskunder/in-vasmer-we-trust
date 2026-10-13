@@ -4,6 +4,7 @@
 Курируемый entries.yml этот скрипт не трогает никогда.
 Чтобы «узаконить» авто-статью, перенеси её строку в entries.yml руками.
 """
+import json
 import re
 from pathlib import Path
 
@@ -57,7 +58,7 @@ def headwords(text):
 
 
 def main():
-    posts = yaml.safe_load((DATA / "posts.json").read_text(encoding="utf-8"))["posts"]
+    posts = json.loads((DATA / "posts.json").read_text(encoding="utf-8"))["posts"]
     curated = yaml.safe_load((DATA / "entries.yml").read_text(encoding="utf-8")) or []
     known_posts = {e["p"] for e in curated}
     known_words = {e["w"].lower() for e in curated}

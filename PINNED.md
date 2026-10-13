@@ -1,6 +1,6 @@
 Навигации по каналу пост:
 
-📖 Навайбкоженый словарь по словам, корням и опросам: https://aleskunder.github.io/in-vasmer-we-trust/
+Навайбкоженый словарь по словам, корням и опросам: https://aleskunder.github.io/in-vasmer-we-trust/
 
 Серии постов:
 
